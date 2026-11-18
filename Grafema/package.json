@@ -1,0 +1,84 @@
+{
+  "name": "grafema",
+  "productName": "Grafema",
+  "version": "1.2.0",
+  "description": "Escritorio de escritura para novelistas, guionistas y autores de suspenso. By Petricorp.",
+  "author": "Petricorp",
+  "license": "UNLICENSED",
+  "private": true,
+  "main": "src/main/main.js",
+  "scripts": {
+    "start": "electron .",
+    "test": "node tests/run-all.js",
+    "dist": "electron-builder --win",
+    "dist:dir": "electron-builder --win --dir"
+  },
+  "dependencies": {
+    "pdf-lib": "^1.17.1"
+  },
+  "devDependencies": {
+    "electron": "^40.0.0",
+    "electron-builder": "^26.8.0"
+  },
+  "build": {
+    "appId": "com.petricorp.grafema",
+    "productName": "Grafema",
+    "copyright": "Copyright © Petricorp",
+    "asar": true,
+    "electronLanguages": [
+      "es",
+      "es-419",
+      "en-US"
+    ],
+    "directories": {
+      "output": "dist",
+      "buildResources": "build"
+    },
+    "files": [
+      "src/**/*",
+      "package.json",
+      "!**/*.map"
+    ],
+    "win": {
+      "icon": "build/icon.ico",
+      "target": [
+        {
+          "target": "nsis",
+          "arch": [
+            "x64"
+          ]
+        },
+        {
+          "target": "portable",
+          "arch": [
+            "x64"
+          ]
+        }
+      ]
+    },
+    "nsis": {
+      "oneClick": false,
+      "perMachine": false,
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true,
+      "shortcutName": "Grafema",
+      "installerIcon": "build/icon.ico",
+      "uninstallerIcon": "build/icon.ico",
+      "deleteAppDataOnUninstall": false,
+      "artifactName": "Grafema-Instalador-${version}.exe"
+    },
+    "portable": {
+      "artifactName": "Grafema-Portatil-${version}.exe"
+    },
+    "fileAssociations": [
+      {
+        "ext": "grafema",
+        "name": "Proyecto de Grafema",
+        "description": "Proyecto de Grafema",
+        "role": "Editor",
+        "icon": "build/icon.ico"
+      }
+    ]
+  }
+}

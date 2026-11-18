@@ -1,0 +1,9 @@
+{
+  "appId": "com.petricorp.grafema",
+  "appName": "Grafema",
+  "webDir": "www",
+  "android": { "allowMixedContent": false },
+  "plugins": {
+    "CapacitorNodeJS": { "nodeDir": "nodejs", "startMode": "auto" }
+  }
+}

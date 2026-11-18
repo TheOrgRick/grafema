@@ -1,0 +1,97 @@
+GRAFEMA  -  by Petricorp
+Escritorio de escritura para novelistas, guionistas y autores de suspenso.
+=========================================================================
+
+COMO OBTENER EL .EXE (instalador de Windows)
+--------------------------------------------
+1. Descomprime esta carpeta en tu computadora (por ejemplo en el Escritorio).
+2. Haz doble clic en  CONSTRUIR_EXE.bat
+   - Si no tienes Node.js, el archivo intenta instalarlo solo (winget) o te
+     abre la pagina de descarga (elige la version LTS).
+   - La primera vez necesita internet (descarga Electron, unos 150 MB) y tarda
+     entre 5 y 15 minutos. Las siguientes veces es mucho mas rapido.
+3. Al terminar se abre la carpeta  dist  con:
+     Grafema-Instalador-1.2.0.exe   -> instalador completo (recomendado)
+     Grafema-Portatil-1.2.0.exe     -> version portatil, sin instalar
+
+Para probar la aplicacion SIN crear el .exe: doble clic en INICIAR_GRAFEMA_PRUEBA.bat
+
+PRIMER USO
+----------
+Grafema solo pide el NOMBRE DEL AUTOR. No hay cuentas, correos ni contrasenas.
+Ese nombre aparece como autor en los PDF y en los documentos .docx.
+Se puede cambiar en  Ajustes > Autor.
+
+QUE INCLUYE
+-----------
+* Manuscrito: editor de texto con capitulos, que lee y guarda documentos .docx.
+  Tamano, tipo y estilo de letra (usa las fuentes instaladas en tu equipo),
+  negrita, cursiva, subrayado, color, resaltado, justificacion, interlineado,
+  sangria, listas, margenes y tamano de papel, saltos de pagina, buscar y
+  reemplazar, importar .docx y exportar cada capitulo a .docx.
+* Biblia del proyecto: perfiles de personajes, objetos, ciudades, lugares,
+  sistemas, facciones, eventos, pistas, sospechosos y coartadas. Los campos de
+  cada tipo se pueden cambiar, y puedes crear tus propios tipos.
+* Mapa de ideas: lienzo con zoom para unir perfiles y notas; las relaciones de
+  la biblia se dibujan solas.
+* Exportar: PDF (con autor y titulo dentro del archivo, portada, numeracion y
+  encabezado opcionales) y manuscrito completo en .docx.
+* Corrector ortografico (espanol e ingles y otros idiomas).
+* Tema oscuro/claro/sistema, efecto Mica o Acrilico en Windows 11, y tamano de
+  la interfaz configurable (ancho x alto en pixeles) en Ajustes.
+
+NOVEDADES DE LA VERSION 1.2
+---------------------------
+* Archivo de proyecto  .grafema : guarda TODO el proyecto en un solo archivo
+  (capitulos, biblia con sus imagenes, todos los mapas y los ajustes del
+  proyecto). En Inicio: menu (...) del proyecto > "Exportar proyecto (.grafema)"
+  y boton "Importar proyecto". Al instalar Grafema, un doble clic en un archivo
+  .grafema lo abre. Importar siempre crea un proyecto NUEVO: nunca pisa los que ya
+  tienes. El archivo no guarda rutas del equipo, asi que sirve igual en Android.
+
+NOVEDADES DE LA VERSION 1.1
+---------------------------
+* Plantillas de inicio al crear un proyecto: En blanco, Novela en tres actos,
+  Novela de suspenso, Cuento o relato corto y Guion (con su formato y texto guia).
+* Varios mapas de ideas por proyecto: crear, renombrar, duplicar y eliminar desde
+  las pestanas de arriba del mapa. Tus mapas anteriores pasan solos a "Mapa 1".
+* PDF ampliado: ademas del manuscrito puede incluir la biblia del proyecto
+  (por tipo de perfil, con imagenes), los mapas (cada uno en una pagina
+  horizontal) y un indice. Cada seccion es opcional.
+* Panel lateral con tres pestanas: Capitulos, Esquema (navegacion por
+  encabezados) y Revision (notas al pie, comentarios y cambios).
+* Notas al pie (Ctrl+Alt+F): numeradas solas; reales en el .docx y al final de
+  cada capitulo en el PDF.
+* Comentarios en el margen (Ctrl+Alt+M), con resolver y reabrir.
+* Control de cambios (Ctrl+Mayus+T): lo que escribes y borras queda marcado;
+  se acepta o rechaza cambio por cambio o todos a la vez. Compatible con Word.
+* Modo enfoque (Ctrl+Mayus+F) y modo lectura (Ctrl+Mayus+L).
+* Buscar y reemplazar con expresiones regulares y "palabra completa".
+* Animaciones suaves, con interruptor en Ajustes > Apariencia > Animaciones
+  para desactivarlas si notas lentitud.
+
+DONDE SE GUARDA TODO
+--------------------
+Solo en tu computadora:  %APPDATA%\Grafema\datos
+(Ajustes > Datos y privacidad > Abrir carpeta de datos).
+Para una copia de seguridad, copia esa carpeta. Nada se sube a la nube.
+La unica conexion a internet es la descarga, una sola vez, de los diccionarios
+del corrector; despues funciona sin conexion.
+
+SI ALGO FALLA AL CREAR EL .EXE
+------------------------------
+* "No se pudieron descargar las dependencias": revisa tu internet o proxy y
+  vuelve a ejecutar CONSTRUIR_EXE.bat.
+* Error de permisos / "symbolic link": el archivo se relanza solo como
+  administrador. Tambien ayuda activar el Modo desarrollador de Windows.
+* Windows SmartScreen puede avisar "editor desconocido" al abrir el instalador
+  porque no esta firmado digitalmente (firmar requiere un certificado de pago).
+  Pulsa "Mas informacion" y luego "Ejecutar de todas formas".
+* Si la aplicacion falla, el registro de errores esta en
+  %APPDATA%\Grafema\grafema.log
+
+PRUEBAS AUTOMATICAS
+-------------------
+npm test   ->  ejecuta las pruebas del nucleo (documentos .docx, proyectos,
+               PDF, empaquetado y proceso principal).
+En tests\e2e hay pruebas de la interfaz con navegador (requieren Playwright).
