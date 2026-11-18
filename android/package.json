@@ -1,0 +1,21 @@
+{
+  "name": "grafema-android",
+  "version": "1.2.0",
+  "private": true,
+  "description": "Grafema para Android (Capacitor + nodejs-mobile). By Petricorp.",
+  "scripts": {
+    "preparar": "node preparar.js",
+    "sincronizar": "node preparar.js && npx cap sync android",
+    "abrir": "npx cap open android"
+  },
+  "dependencies": {
+    "@capacitor/android": "^7.0.0",
+    "@capacitor/core": "^7.0.0",
+    "@capacitor/filesystem": "^7.0.0",
+    "@capacitor/share": "^7.0.0",
+    "capacitor-nodejs": "^1.0.0-beta.9"
+  },
+  "devDependencies": {
+    "@capacitor/cli": "^7.0.0"
+  }
+}

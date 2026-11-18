@@ -1,0 +1,50 @@
+GRAFEMA PARA ANDROID (APK)  -  by Petricorp
+===========================================
+Estado: la parte de codigo esta lista y probada en la computadora (nucleo, puente, importar/exportar .grafema).
+Lo que NO se ha podido probar es la compilacion del APK ni la ejecucion en un telefono: eso se hace en tu
+computadora con Android Studio, siguiendo estos pasos.
+
+QUE NECESITAS (una sola vez)
+  1. Node.js LTS            https://nodejs.org
+  2. Android Studio         https://developer.android.com/studio   (incluye el SDK y un emulador)
+  3. Internet para la primera vez (descarga las librerias)
+
+PASOS
+  1. En la carpeta principal de Grafema:      npm install
+  2. Entra a la carpeta android:               cd android
+  3.                                            npm install
+  4. Agrega la plataforma (solo la 1.a vez):   npx cap add android
+  5. Arma e incluye la app:                    npm run sincronizar
+  6. Abre Android Studio:                      npm run abrir
+  7. En Android Studio: Build > Build Bundle(s) / APK(s) > Build APK(s)
+     El archivo queda en  android/android/app/build/outputs/apk/debug/app-debug.apk
+  8. Pasa el .apk al telefono (cable, Drive, correo) y abrelo. Android pedira permitir "instalar apps
+     desconocidas" para el navegador o el gestor de archivos que uses.
+
+PARA PUBLICAR EN PLAY STORE (despues)
+  Build > Generate Signed Bundle / APK, con una clave de firma propia (guardala: sin ella no puedes actualizar).
+
+COMO FUNCIONA
+  * La interfaz es la misma de Windows, con una barra de navegacion inferior y botones grandes (css/android.css).
+  * El nucleo de Grafema corre dentro de la app con nodejs-mobile (carpeta www/nodejs). Los proyectos se guardan
+    SOLO dentro del telefono; nada se sube a la nube.
+  * Importar: boton "Importar proyecto" -> eliges un .grafema (de Descargas, Drive, WhatsApp...).
+  * Exportar: menu (...) del proyecto -> "Exportar proyecto (.grafema)" -> se abre "Compartir" de Android para
+    guardarlo en Descargas, Drive, correo, etc.
+  * El mismo .grafema abre en Windows y en Android.
+
+AUN NO ESTA EN ANDROID (se quita o avisa en pantalla)
+  PDF, importar/exportar .docx, corrector ortografico propio, ventana configurable, abrir un .grafema tocandolo
+  desde otra app. Todo lo demas (manuscrito, biblia, mapas, plantillas) usa el mismo codigo.
+
+SI ALGO FALLA AL COMPILAR
+  Los nombres de eventos del plugin capacitor-nodejs ("channel.on", "NodeJS.send", carpeta "nodejs") dependen de
+  su version. Si cambian, solo hay que ajustar android/nodejs/main.js y src/renderer/js/android-bridge.js.
+
+COMPILAR EL APK EN LA NUBE (GitHub Actions, sin instalar Android Studio)
+  1. Crea una cuenta en github.com y un repositorio nuevo (privado esta bien).
+  2. Sube TODO el contenido de la carpeta Grafema (incluida la carpeta oculta .github).
+  3. En el repositorio abre la pestana "Actions" y elige "Compilar APK de Android" > "Run workflow".
+  4. Espera de 10 a 20 minutos. Al terminar, entra a esa ejecucion y descarga "Grafema-APK" (zip con app-debug.apk).
+  5. Pasa el .apk al telefono e instalalo.
+  Si el paso falla, abre la ejecucion, copia el texto del paso en rojo y mandamelo para corregirlo.
