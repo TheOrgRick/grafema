@@ -36,6 +36,18 @@ jobs:
         working-directory: android
         run: npm install --legacy-peer-deps
 
+      # El plugin capacitor-nodejs trae "Bridge.h" pero su código pide "bridge.h": en Windows/Mac funciona,
+      # en Linux (el servidor de GitHub) no. Se crea una copia con el nombre en minúsculas.
+      - name: Corregir mayúsculas del plugin de Node
+        working-directory: android
+        run: |
+          cpp=node_modules/capacitor-nodejs/android/src/main/cpp
+          echo "Versión del plugin:" && node -p "require('./node_modules/capacitor-nodejs/package.json').version"
+          echo "Archivos en $cpp:" && ls -la "$cpp"
+          h=$(find node_modules/capacitor-nodejs/android -iname 'bridge.h' | head -n 1)
+          echo "Encabezado encontrado: ${h:-ninguno}"
+          if [ -n "$h" ] && [ ! -f "$cpp/bridge.h" ]; then cp "$h" "$cpp/bridge.h"; echo "Copiado a $cpp/bridge.h"; fi
+
       - name: Armar interfaz y núcleo
         working-directory: android
         run: node preparar.js
