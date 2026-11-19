@@ -95,5 +95,34 @@ test('index.html carga el puente antes que la aplicación y el APK usa rutas rel
   for (const m of html.matchAll(/(?:src|href)="([^"]+\.(?:js|css))"/g)) assert.ok(fs.existsSync(path.join(root, 'android/www', m[1])), 'no existe ' + m[1]);
 });
 
+test('logo de Grafema en el APK: íconos, adaptable, monocromo y splash válidos desde build/logo.svg', () => {
+  const res = path.join(tmp(), 'res');
+  fs.mkdirSync(path.join(res, 'values'), { recursive: true });
+  fs.mkdirSync(path.join(res, 'drawable-port-mdpi'), { recursive: true });
+  const { aPng, lienzo } = require(path.join(root, 'android/identidad.js'));
+  fs.writeFileSync(path.join(res, 'drawable-port-mdpi/splash.png'), aPng(lienzo(320, 480, [255, 255, 255])));
+  fs.writeFileSync(path.join(res, 'values/styles.xml'), '<resources>\n    <style name="AppTheme.NoActionBarLaunch" parent="Theme.SplashScreen">\n        <item name="android:background">@drawable/splash</item>\n    </style>\n</resources>');
+  const salida = cp.execFileSync(process.execPath, [path.join(root, 'android/identidad.js'), res], { encoding: 'utf8' });
+  assert.ok(/aplicado/.test(salida), salida);
+  const medidas = (f) => { const d = fs.readFileSync(path.join(res, f)); assert.strictEqual(d.toString('ascii', 1, 4), 'PNG', f); return [d.readUInt32BE(16), d.readUInt32BE(20)]; };
+  assert.deepStrictEqual(medidas('mipmap-mdpi/ic_launcher.png'), [48, 48]);
+  assert.deepStrictEqual(medidas('mipmap-xxxhdpi/ic_launcher_round.png'), [192, 192]);
+  assert.deepStrictEqual(medidas('mipmap-xxhdpi/ic_launcher_foreground.png'), [324, 324]);
+  assert.deepStrictEqual(medidas('mipmap-hdpi/ic_launcher_monochrome.png'), [162, 162]);
+  assert.deepStrictEqual(medidas('drawable-port-mdpi/splash.png'), [320, 480]); // conserva el tamaño del splash original
+  assert.ok(/#0A0A0A/.test(fs.readFileSync(path.join(res, 'values/ic_launcher_background.xml'), 'utf8')));
+  const xml = fs.readFileSync(path.join(res, 'mipmap-anydpi-v26/ic_launcher.xml'), 'utf8');
+  assert.ok(/foreground/.test(xml) && /monochrome/.test(xml));
+  assert.ok(/windowSplashScreenBackground/.test(fs.readFileSync(path.join(res, 'values/styles.xml'), 'utf8')));
+  cp.execFileSync(process.execPath, [path.join(root, 'android/identidad.js'), res]); // repetirlo no duplica nada
+  assert.strictEqual((fs.readFileSync(path.join(res, 'values/styles.xml'), 'utf8').match(/windowSplashScreenBackground/g) || []).length, 1);
+});
+test('el plugin de Node se instala desde la versión de Capacitor 7 que usa el puente (CapacitorNodeJS), no la 0.0.1 de npm', () => {
+  const pkg = JSON.parse(fs.readFileSync(path.join(root, 'android/package.json'), 'utf8'));
+  assert.ok(/^https:\/\/github\.com\/.+capacitor-nodejs\.tgz$/.test(pkg.dependencies['capacitor-nodejs']), pkg.dependencies['capacitor-nodejs']);
+  const cfg = JSON.parse(fs.readFileSync(path.join(root, 'android/capacitor.config.json'), 'utf8'));
+  assert.ok(cfg.plugins.CapacitorNodeJS && cfg.plugins.CapacitorNodeJS.nodeDir === 'nodejs');
+});
+
 module.exports = () => run('Android');
 if (require.main === module) module.exports().then((r) => process.exit(r.failed ? 1 : 0));

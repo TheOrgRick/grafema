@@ -14,7 +14,7 @@ PASOS
   2. Entra a la carpeta android:               cd android
   3.                                            npm install
   4. Agrega la plataforma (solo la 1.a vez):   npx cap add android
-  5. Arma e incluye la app:                    npm run sincronizar
+  5. Arma e incluye la app (y pone el logo):   npm run sincronizar
   6. Abre Android Studio:                      npm run abrir
   7. En Android Studio: Build > Build Bundle(s) / APK(s) > Build APK(s)
      El archivo queda en  android/android/app/build/outputs/apk/debug/app-debug.apk
@@ -23,6 +23,17 @@ PASOS
 
 PARA PUBLICAR EN PLAY STORE (despues)
   Build > Generate Signed Bundle / APK, con una clave de firma propia (guardala: sin ella no puedes actualizar).
+
+LOGO Y PANTALLA DE ARRANQUE
+  android/identidad.js dibuja el logo de Grafema (lo lee de build/logo.svg, el mismo de Windows) y lo pone como
+  icono de la app (normal, redondo, adaptable y monocromo para Android 13), pantalla de arranque oscura y color de
+  fondo #0A0A0A. Se ejecuta solo con "npm run sincronizar" y en GitHub Actions; a mano:  npm run logo
+  Si cambias build/logo.svg, el APK siguiente trae el logo nuevo sin tocar nada mas.
+
+PLUGIN DE NODE (importante)
+  "capacitor-nodejs" en npm es una version vieja (0.0.1, de Capacitor 3) y NO sirve: otro nombre de plugin y otra API.
+  Por eso android/package.json lo instala desde GitHub (EdenwareApps/Capacitor-NodeJS, v1.0.0-beta.9: Capacitor 7 y
+  binarios corregidos para telefonos arm64 reales). No lo cambies a "latest".
 
 COMO FUNCIONA
   * La interfaz es la misma de Windows, con una barra de navegacion inferior y botones grandes (css/android.css).
@@ -38,8 +49,8 @@ AUN NO ESTA EN ANDROID (se quita o avisa en pantalla)
   desde otra app. Todo lo demas (manuscrito, biblia, mapas, plantillas) usa el mismo codigo.
 
 SI ALGO FALLA AL COMPILAR
-  Los nombres de eventos del plugin capacitor-nodejs ("channel.on", "NodeJS.send", carpeta "nodejs") dependen de
-  su version. Si cambian, solo hay que ajustar android/nodejs/main.js y src/renderer/js/android-bridge.js.
+  Los nombres de eventos del plugin capacitor-nodejs ("channel.addListener", "CapacitorNodeJS.send", carpeta "nodejs")
+  dependen de su version. Si la app abre y muestra un aviso de "motor", ese texto dice que parte falta. Si cambian, solo hay que ajustar android/nodejs/main.js y src/renderer/js/android-bridge.js.
 
 COMPILAR EL APK EN LA NUBE (GitHub Actions, sin instalar Android Studio)
   1. Crea una cuenta en github.com y un repositorio nuevo (privado esta bien).

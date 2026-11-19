@@ -2,8 +2,14 @@
   "appId": "com.petricorp.grafema",
   "appName": "Grafema",
   "webDir": "www",
-  "android": { "allowMixedContent": false },
+  "backgroundColor": "#0A0A0A",
+  "android": {
+    "allowMixedContent": false
+  },
   "plugins": {
-    "CapacitorNodeJS": { "nodeDir": "nodejs", "startMode": "auto" }
+    "CapacitorNodeJS": {
+      "nodeDir": "nodejs",
+      "startMode": "auto"
+    }
   }
 }
