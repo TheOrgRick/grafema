@@ -2,38 +2,60 @@
    Las llamadas van al mismo núcleo que usa Windows, que corre dentro de la app (nodejs-mobile). */
 (function () {
   'use strict';
-  if (window.grafema || !window.Capacitor || !window.Capacitor.Plugins) return;
-  const P = window.Capacitor.Plugins;
-  const Node = P.CapacitorNodeJS;
-  if (!Node) return;
+  const Cap = window.Capacitor;
+  if (window.grafema || !Cap) return;
+  const ua = (typeof navigator !== 'undefined' && navigator.userAgent) || '';
+  const native = (typeof Cap.isNativePlatform === 'function' && Cap.isNativePlatform()) || /Android/i.test(ua) || !!Cap.Plugins;
+  if (!native) return;
   const G = (window.G = window.G || {});
-  G.isAndroid = true;
+  G.isAndroid = true; // se marca antes que nada para que el diseño de teléfono se aplique incluso si algo falla después
   document.documentElement.classList.add('android');
+
+  // Los plugins se piden por nombre: primero en Capacitor.Plugins y, si no está, con registerPlugin.
+  const plugin = (name) => {
+    try { if (Cap.Plugins && Cap.Plugins[name]) return Cap.Plugins[name]; } catch (_) { /* noop */ }
+    try { if (typeof Cap.registerPlugin === 'function') return Cap.registerPlugin(name); } catch (_) { /* noop */ }
+    return null;
+  };
+  const P = { get Filesystem() { return plugin('Filesystem'); }, get Share() { return plugin('Share'); } };
+  const Node = plugin('CapacitorNodeJS');
+  const fail = (code, message) => ({ ok: false, code, message });
+  const diag = () => 'Capacitor: ' + (Cap ? 'sí' : 'no') + ' · plataforma: ' + ((typeof Cap.getPlatform === 'function' && Cap.getPlatform()) || '?') +
+    ' · plugin de Node: ' + (Node ? 'sí' : 'no') + (Node ? ' (send: ' + (typeof Node.send) + ', addListener: ' + (typeof Node.addListener) + ')' : '');
 
   const pending = new Map();
   let seq = 0;
+  let engineError = null;
   const ready = new Promise((resolve) => {
     let done = false;
     const go = () => { if (!done) { done = true; resolve(); } };
-    Node.addListener('grafema-ready', go);
-    Node.addListener('grafema-reply', (ev) => {
-      const d = (ev && ev.args && ev.args[0]) || ev || {};
-      const w = pending.get(d.id);
-      if (w) { pending.delete(d.id); w(d.result); }
-    });
-    Promise.resolve(Node.whenReady ? Node.whenReady() : null).then(go, go);
+    try {
+      if (!Node || typeof Node.addListener !== 'function' || typeof Node.send !== 'function') throw new Error('El plugin de Node no está disponible. ' + diag());
+      const on = (name, fn) => { const r = Node.addListener(name, fn); if (r && typeof r.catch === 'function') r.catch((e) => { engineError = e; }); };
+      on('grafema-ready', (ev) => { const d = (ev && ev.args && ev.args[0]) || ev || {}; if (d && d.error) engineError = new Error(d.error); go(); });
+      on('grafema-reply', (ev) => {
+        const d = (ev && ev.args && ev.args[0]) || ev || {};
+        const w = pending.get(d.id);
+        if (w) { pending.delete(d.id); w(d.result); }
+      });
+      Promise.resolve(typeof Node.whenReady === 'function' ? Node.whenReady() : null).then(go, go);
+      setTimeout(go, 6000); // si el aviso de «listo» llegó antes de que escucháramos, seguimos de todos modos
+    } catch (e) { engineError = e; go(); }
   });
 
   const toCore = async (channel, payload) => {
     await ready;
+    if (engineError) return fail('ENGINE', 'El motor de Grafema no pudo iniciar: ' + ((engineError && engineError.message) || engineError));
     return new Promise((resolve) => {
       const id = ++seq;
-      pending.set(id, resolve);
-      Node.send({ eventName: 'grafema', args: [{ id, channel, payload }] });
+      const timer = setTimeout(() => { pending.delete(id); resolve(fail('ENGINE_TIMEOUT', 'El motor de Grafema no respondió. ' + diag())); }, 30000);
+      pending.set(id, (r) => { clearTimeout(timer); resolve(r); });
+      try {
+        const r = Node.send({ eventName: 'grafema', args: [{ id, channel, payload }] });
+        if (r && typeof r.catch === 'function') r.catch((e) => { clearTimeout(timer); pending.delete(id); resolve(fail('ENGINE', 'No se pudo hablar con el motor de Grafema: ' + ((e && e.message) || e))); });
+      } catch (e) { clearTimeout(timer); pending.delete(id); resolve(fail('ENGINE', 'No se pudo hablar con el motor de Grafema: ' + ((e && e.message) || e))); }
     });
   };
-  const fail = (code, message) => ({ ok: false, code, message });
-
   function pickFile() {
     return new Promise((resolve) => {
       const inp = document.createElement('input');

@@ -30,7 +30,7 @@ function loadBridge(NodePlugin, extra) {
   const doc = { documentElement: { classList: { add: (c) => { doc.cls = c; } } }, body: { appendChild() {} },
     createElement: () => { const el = { style: {}, listeners: {}, addEventListener(n, f) { el.listeners[n] = f; }, remove() {}, click() { el.files = picks.file ? [picks.file] : []; el.listeners.change(); } }; return el; } };
   class FR { readAsDataURL(f) { this.result = 'data:application/octet-stream;base64,' + f.b64; setTimeout(() => this.onload(), 0); } }
-  const ctx = vm.createContext({ window: win, document: doc, FileReader: FR, setTimeout, Promise });
+  const ctx = vm.createContext({ window: win, document: doc, FileReader: FR, navigator: { userAgent: 'Android' }, setTimeout, clearTimeout, Promise });
   vm.runInContext(fs.readFileSync(path.join(root, 'src/renderer/js/android-bridge.js'), 'utf8'), ctx);
   return { win, doc, picks, shared, written };
 }
@@ -75,6 +75,14 @@ test('importar en Android: un .grafema de otro dispositivo (Windows) se abre y n
 test('funciones aún no disponibles en Android avisan con un mensaje claro (no fallan en silencio)', async () => {
   const g = loadBridge(makeEnv(tmp())).win.grafema;
   for (const c of ['export:pdf', 'chapter:importDocx', 'window:setSize']) { const r = await g.invoke(c, {}); assert.strictEqual(r.ok, false); assert.strictEqual(r.code, 'NOT_SUPPORTED'); assert.ok(r.message.length > 20); }
+});
+test('si falta el plugin de Node, la app muestra la causa en pantalla (no se queda en blanco)', async () => {
+  const win = { Capacitor: { Plugins: {}, getPlatform: () => 'android' } };
+  const doc = { documentElement: { classList: { add() {} } } };
+  vm.runInContext(fs.readFileSync(path.join(root, 'src/renderer/js/android-bridge.js'), 'utf8'), vm.createContext({ window: win, document: doc, navigator: { userAgent: 'Android' }, setTimeout, clearTimeout, Promise }));
+  assert.ok(win.G.isAndroid, 'debe marcar Android aunque falle el motor');
+  const r = await win.grafema.invoke('project:list');
+  assert.strictEqual(r.ok, false); assert.strictEqual(r.code, 'ENGINE'); assert.ok(/plugin de Node/.test(r.message), r.message);
 });
 test('en Windows (Electron) el puente de Android no hace nada', () => {
   const win = { grafema: { marker: 1 }, Capacitor: { Plugins: { CapacitorNodeJS: {} } } };
