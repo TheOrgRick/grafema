@@ -34,7 +34,7 @@ jobs:
 
       - name: Instalar Capacitor
         working-directory: android
-        run: npm install
+        run: npm install --legacy-peer-deps
 
       - name: Armar interfaz y núcleo
         working-directory: android
