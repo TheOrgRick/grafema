@@ -1,8 +1,10 @@
 name: Compilar APK de Android
 
-# Se ejecuta solo: cada vez que subes cambios a la rama principal, o a mano desde la pestaña "Actions".
+# Se ejecuta solo: al subir cambios a la rama principal, en cada Pull Request, o a mano desde la pestaña "Actions".
 on:
   push:
+    branches: [main, master]
+  pull_request:
     branches: [main, master]
   workflow_dispatch:
 
@@ -54,9 +56,16 @@ jobs:
 
       - name: Crear proyecto Android
         working-directory: android
-        run: |
-          npx cap add android
-          npx cap sync android
+        run: npx cap add android
+
+      # Logo de Grafema: ícono (normal, redondo, adaptable y monocromo), pantalla de arranque y fondo oscuro.
+      - name: Poner el logo de Grafema
+        working-directory: android
+        run: node identidad.js
+
+      - name: Sincronizar
+        working-directory: android
+        run: npx cap sync android
 
       - name: Compilar APK
         working-directory: android/android
