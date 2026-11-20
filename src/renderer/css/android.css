@@ -45,3 +45,7 @@
 .android .ed-toolbar::-webkit-scrollbar { display: none; }
 .android .ed-toolbar > *, .android .tg { flex: none; }
 .android .tb-font { width: 128px; }
+
+/* Avisos largos (p. ej. errores del motor): que se ajusten al ancho del teléfono en vez de cortarse. */
+.android .empty { padding: 0 20px; text-align: center; overflow-wrap: anywhere; word-break: break-word; }
+.android .empty > div { max-width: 100%; }
