@@ -124,5 +124,15 @@ test('el plugin de Node se instala desde la versión de Capacitor 7 que usa el p
   assert.ok(cfg.plugins.CapacitorNodeJS && cfg.plugins.CapacitorNodeJS.nodeDir === 'nodejs');
 });
 
+test('Android solo exporta .grafema: sin pdf-lib en el APK y sin botones de PDF/.docx en la interfaz', () => {
+  assert.ok(!fs.existsSync(path.join(root, 'android/www/nodejs/node_modules/pdf-lib')), 'pdf-lib no debe viajar en el APK');
+  const ex = fs.readFileSync(path.join(root, 'android/www/js/export.js'), 'utf8');
+  const rama = ex.slice(ex.indexOf('if (G.isAndroid)'), ex.indexOf('return { destroy() {} };'));
+  assert.ok(/project:exportFile/.test(rama) && !/doExport|export:pdf|export:docx/.test(rama), 'la pantalla de Android solo debe exportar .grafema');
+  const ed = fs.readFileSync(path.join(root, 'android/www/js/editor.js'), 'utf8');
+  assert.ok(/G\.isAndroid\) B\.docx\.style\.display = 'none'/.test(ed) && /!G\.isAndroid && h\('button'[^\n]*importDocx/.test(ed) && /\.\.\.\(G\.isAndroid \? \[\] : \[\{ label: 'Guardar como \.docx/.test(ed), 'el editor debe ocultar .docx en Android');
+  for (const f of ['export.js', 'editor.js', 'home.js']) cp.execFileSync(process.execPath, ['--check', path.join(root, 'android/www/js', f)]);
+});
+
 module.exports = () => run('Android');
 if (require.main === module) module.exports().then((r) => process.exit(r.failed ? 1 : 0));

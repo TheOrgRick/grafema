@@ -2,19 +2,27 @@
 // Núcleo de Grafema dentro de Android (nodejs-mobile). Es el MISMO código que usa la versión de Windows:
 // recibe mensajes de la interfaz, ejecuta el canal pedido y devuelve el resultado.
 const path = require('path');
+// En nodejs-mobile el motor corre DENTRO del proceso de la app: un error sin capturar aquí cierra toda la app.
+// Por eso nada se deja sin capturar: se registra en logcat y la interfaz recibe el aviso.
+const logErr = (donde, e) => { try { console.error('[grafema]', donde, (e && e.stack) || e); } catch (_) { /* noop */ } };
+process.on('uncaughtException', (e) => logErr('uncaughtException', e));
+process.on('unhandledRejection', (e) => logErr('unhandledRejection', e));
 let bridge;
 try { bridge = require('bridge'); } catch (_) { bridge = global.__grafemaTestBridge; } // 'bridge' lo aporta el plugin; en pruebas se simula
-if (!bridge) throw new Error('No se encontró el puente con la aplicación.');
-let createCore;
-try { ({ createCore } = require('./src/main/app-core')); } catch (_) { ({ createCore } = require('../../src/main/app-core')); }
+if (!bridge) { logErr('inicio', new Error('No se encontró el puente con la aplicación.')); return; }
+let createCore, loadError = null;
+try { ({ createCore } = require('./src/main/app-core')); } catch (_) {
+  try { ({ createCore } = require('../../src/main/app-core')); } catch (e) { loadError = e; logErr('no se pudo cargar app-core', e); }
+}
 
 const chan = bridge.channel;
 const listen = (name, fn) => (typeof chan.addListener === 'function' ? chan.addListener(name, fn) : chan.on(name, fn));
 let appDir = null;
 try { appDir = bridge.app && typeof bridge.app.datadir === 'function' ? bridge.app.datadir() : null; } catch (_) { /* noop */ }
 const base = process.env.GRAFEMA_DATA_DIR || path.join(appDir || process.env.DATADIR || process.cwd(), 'grafema-datos');
-let core = null, startError = null;
+let core = null, startError = loadError;
 try {
+  if (loadError) throw loadError;
   core = createCore({
     dataDir: base,
     log: (where, err) => { try { console.error('[grafema]', where, (err && err.stack) || err); } catch (_) { /* noop */ } },

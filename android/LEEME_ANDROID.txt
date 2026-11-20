@@ -44,7 +44,7 @@ COMO FUNCIONA
     guardarlo en Descargas, Drive, correo, etc.
   * El mismo .grafema abre en Windows y en Android.
 
-AUN NO ESTA EN ANDROID (se quita o avisa en pantalla)
+AUN NO ESTA EN ANDROID (se oculta de la interfaz; pdf-lib ni siquiera viaja en el APK)
   PDF, importar/exportar .docx, corrector ortografico propio, ventana configurable, abrir un .grafema tocandolo
   desde otra app. Todo lo demas (manuscrito, biblia, mapas, plantillas) usa el mismo codigo.
 

@@ -8,6 +8,22 @@
   G.views.export = async function exportView(container) {
     const project = G.state.project;
     const pid = project.id;
+    if (G.isAndroid) {
+      // En Android solo se exporta el proyecto completo como archivo .grafema (sin PDF ni .docx).
+      container.className = 'ex';
+      const btn = h('button', { class: 'btn primary', type: 'button', onclick: async () => {
+        try {
+          await G.flushAll();
+          const r = await G.withBusy(btn, () => G.call('project:exportFile', { projectId: pid }));
+          if (r && !r.canceled) G.toast('Proyecto guardado como archivo .grafema.', { kind: 'ok' });
+        } catch (e) { G.toast(e.message, { kind: 'err' }); }
+      } }, G.icon('doc', 16), 'Exportar proyecto (.grafema)');
+      container.append(h('div', { class: 'ex-form scroll' },
+        h('div', { class: 'col gap-4' }, h('h1', { class: 't-sub' }, 'Exportar proyecto'),
+          h('p', { class: 'muted' }, 'El proyecto completo (manuscrito, biblia y mapas) se guarda como un archivo .grafema que puedes enviar o abrir en Grafema para Windows y en otro teléfono.')),
+        h('div', { class: 'ex-actions' }, btn)));
+      return { destroy() {} };
+    }
     const saved = project.export && typeof project.export === 'object' ? project.export : {};
     const user = G.state.user || {};
     const opts = {

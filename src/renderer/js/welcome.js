@@ -6,7 +6,7 @@
 
   G.views.welcome = function welcomeView(opts) {
     const name = h('input', { class: 'input', type: 'text', maxlength: 80, autocomplete: 'name', placeholder: 'Por ejemplo: Ana López', 'data-autofocus': '' });
-    const f = G.field('Nombre del autor', name, { hint: 'Aparecerá como autor en tus PDF y documentos .docx. Podrás cambiarlo cuando quieras en Ajustes.' });
+    const f = G.field('Nombre del autor', name, { hint: (G.isAndroid ? 'Aparecerá como autor de tus proyectos. ' : 'Aparecerá como autor en tus PDF y documentos .docx. ') + 'Podrás cambiarlo cuando quieras en Ajustes.' });
     const go = h('button', { class: 'btn primary block', type: 'submit' }, 'Empezar a escribir');
     const form = h('form', { class: 'col gap-16', novalidate: true, onsubmit: async (ev) => {
       ev.preventDefault();

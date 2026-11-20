@@ -25,8 +25,6 @@ for (const f of ['app-core', 'store', 'errors', 'docx', 'xml', 'zip', 'exporter'
 }
 cp(path.join(root, 'src/shared'), path.join(node, 'src/shared'));
 cp(path.join(__dirname, 'nodejs/main.js'), path.join(node, 'main.js'));
-const pdfLib = path.join(root, 'node_modules/pdf-lib');
-if (fs.existsSync(pdfLib)) cp(pdfLib, path.join(node, 'node_modules/pdf-lib'));
-else console.warn('Aviso: falta node_modules/pdf-lib (ejecuta "npm install" en la carpeta principal). El PDF no estará disponible.');
+// Sin PDF en Android: pdf-lib no se incluye en el APK (en el teléfono solo se exporta .grafema).
 fs.writeFileSync(path.join(node, 'package.json'), JSON.stringify({ name: 'grafema-nucleo', version: '1.2.0', main: 'main.js', private: true }, null, 2));
 console.log('Listo: ' + path.relative(process.cwd(), www));

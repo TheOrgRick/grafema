@@ -12,7 +12,7 @@
     if (existing && existing.genre && !GENRES.includes(existing.genre)) genre.appendChild(h('option', { value: existing.genre, selected: true }, existing.genre));
     const author = h('input', { class: 'input', type: 'text', maxlength: 80, value: existing ? existing.author : (G.state.user && G.state.user.name) || '' });
     const desc = h('textarea', { class: 'textarea', maxlength: 500, placeholder: 'Una frase sobre de qué trata (opcional).' }, existing ? existing.description : '');
-    const fN = G.field('Nombre del proyecto', name), fG = G.field('Género', genre), fA = G.field('Autor (aparece en el PDF)', author), fD = G.field('Descripción', desc);
+    const fN = G.field('Nombre del proyecto', name), fG = G.field('Género', genre), fA = G.field(G.isAndroid ? 'Autor' : 'Autor (aparece en el PDF)', author), fD = G.field('Descripción', desc);
     // Plantillas de inicio (solo al crear): capítulos con guía, formato de página y tipografía.
     let tpl = 'blank', lastTplGenre = '';
     let gallery = null;
@@ -87,7 +87,7 @@
       if (r) { if (G.state.project && G.state.project.id === r.id) { G.state.project = r; G.refreshShell(); } await reload(); }
     }
     async function deleteProject(p) {
-      const ok = await G.confirm({ title: 'Eliminar «' + p.name + '»', message: `Se eliminarán sus ${p.chapters} capítulo(s), la biblia y el mapa de ideas. Esta acción no se puede deshacer. Si quieres conservar el texto, primero expórtalo a .docx.`, confirmLabel: 'Eliminar proyecto', danger: true });
+      const ok = await G.confirm({ title: 'Eliminar «' + p.name + '»', message: `Se eliminarán sus ${p.chapters} capítulo(s), la biblia y el mapa de ideas. Esta acción no se puede deshacer. Si quieres conservar el texto, primero expórtalo ${G.isAndroid ? 'como .grafema' : 'a .docx'}.`, confirmLabel: 'Eliminar proyecto', danger: true });
       if (!ok) return;
       try {
         await G.call('project:delete', { id: p.id });

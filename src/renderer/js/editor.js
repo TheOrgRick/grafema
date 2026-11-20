@@ -75,6 +75,7 @@
     B.find = tb('search', 'Buscar y reemplazar', () => toggleFind(true), { key: 'Ctrl+F' });
     B.page = h('button', { class: 'btn sm', type: 'button', title: 'Tamaño de página, márgenes y texto base', onmousedown: (e) => e.preventDefault(), onclick: (e) => openPageSettings(e.currentTarget) }, G.icon('page', 16), 'Página');
     B.docx = tb('save', 'Guardar este capítulo como .docx…', () => exportDocx());
+    if (G.isAndroid) B.docx.style.display = 'none'; // en Android no hay .docx: solo .grafema
     B.side = tb('sidebar', 'Mostrar u ocultar el panel lateral', () => { sideOpen = !sideOpen; syncSide(); }, { toggle: true });
     const sep = () => h('span', { class: 'tb-sep', 'aria-hidden': 'true' });
     const tbar = h('div', { class: 'ed-toolbar', role: 'toolbar', 'aria-label': 'Formato de texto' },
@@ -535,7 +536,7 @@
       const chs = P().chapters;
       side.append(
         h('div', { class: 'side-head' }, h('h2', { class: 'strong grow' }, 'Capítulos'),
-          h('button', { class: 'ibtn sm', type: 'button', title: 'Importar documentos .docx', 'aria-label': 'Importar documentos .docx', onclick: importDocx }, G.icon('import', 16)),
+          !G.isAndroid && h('button', { class: 'ibtn sm', type: 'button', title: 'Importar documentos .docx', 'aria-label': 'Importar documentos .docx', onclick: importDocx }, G.icon('import', 16)),
           h('button', { class: 'ibtn sm', type: 'button', title: 'Nuevo capítulo', 'aria-label': 'Nuevo capítulo', onclick: newChapter }, G.icon('plus', 16))),
         h('div', { class: 'side-list scroll', role: 'list' }, chs.map((c, i) => {
           const more = h('button', { class: 'ibtn sm', type: 'button', 'aria-label': 'Acciones del capítulo ' + c.title, onclick: (e) => { e.stopPropagation(); chapterMenu(more, c, i); } }, G.icon('more', 16));
@@ -551,7 +552,7 @@
         { label: 'Renombrar', icon: 'edit', onClick: () => renameChapter(c) },
         { label: 'Mover arriba', icon: 'arrowUp', disabled: i === 0, onClick: () => moveChapter(i, -1) },
         { label: 'Mover abajo', icon: 'arrowDown', disabled: i === chs.length - 1, onClick: () => moveChapter(i, 1) },
-        { label: 'Guardar como .docx…', icon: 'save', onClick: async () => { if (c.id === curId) exportDocx(); else { try { const r = await G.call('chapter:exportDocx', { projectId: pid, chapterId: c.id }); if (!r.canceled) G.toast('Capítulo guardado en ' + r.path, { kind: 'ok' }); } catch (e) { G.toast(e.message, { kind: 'err' }); } } } },
+        ...(G.isAndroid ? [] : [{ label: 'Guardar como .docx…', icon: 'save', onClick: async () => { if (c.id === curId) exportDocx(); else { try { const r = await G.call('chapter:exportDocx', { projectId: pid, chapterId: c.id }); if (!r.canceled) G.toast('Capítulo guardado en ' + r.path, { kind: 'ok' }); } catch (e) { G.toast(e.message, { kind: 'err' }); } } } }]),
         { separator: true },
         { label: 'Eliminar capítulo', icon: 'trash', danger: true, onClick: () => deleteChapter(c) },
       ], { align: 'right' });
